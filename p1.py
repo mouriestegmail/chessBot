@@ -36,8 +36,8 @@ images = {
     "k": ImageTk.PhotoImage(Image.open("F/Kb.png").resize((square_size, square_size))),
 }
 
-# Рисуем доску
-canvas = tk.Canvas(root, width=square_size * 8, height=square_size * 8)
+# Рисуем доску с размерами чуть больше, чтобы добавить подписи
+canvas = tk.Canvas(root, width=square_size * 8 + 40, height=square_size * 8 + 40)
 canvas.pack()
 
 # Функция для обновления доски на холсте
@@ -46,11 +46,19 @@ def draw_board():
     for row in range(8):
         for col in range(8):
             color = colors[(row + col) % 2]
-            canvas.create_rectangle(col * square_size, row * square_size,
-                                    (col + 1) * square_size, (row + 1) * square_size, fill=color)
+            # Рисуем клетки доски
+            canvas.create_rectangle(20 + col * square_size, 20 + row * square_size,
+                                    20 + (col + 1) * square_size, 20 + (row + 1) * square_size, fill=color)
             piece = board[row][col]
             if piece != " ":
-                canvas.create_image(col * square_size, row * square_size, anchor=tk.NW, image=images[piece])
+                canvas.create_image(20 + col * square_size, 20 + row * square_size, anchor=tk.NW, image=images[piece])
+
+    # Добавляем буквенные и числовые подписи
+    for i in range(8):
+        # Вертикальные подписи (1-8) слева от доски
+        canvas.create_text(10, 20 + i * square_size + square_size / 2, text=str(8 - i), font=("Arial", 12))
+        # Горизонтальные подписи (a-h) под доской
+        canvas.create_text(20 + i * square_size + square_size / 2, 8 * square_size + 30, text=chr(97 + i), font=("Arial", 12))
 
 # Преобразование буквенно-цифровой нотации в координаты
 def notation_to_coordinates(move):
