@@ -56,26 +56,62 @@ root.geometry("+500+50")
 
 is_flipped = False
 
-def draw_board():
+# Список для хранения координат всех подсвеченных клеток
+highlighted_squares = []
+highlight_color = "#FF4500"  # Охряный цвет для подсветки
 
+
+# Функция для добавления/удаления подсветки клетки при правом клике
+def highlight_square(event):
+    col = (event.x - 20) // square_size
+    row = (event.y - 20) // square_size
+    if 0 <= col < 8 and 0 <= row < 8:
+        display_row = 7 - row if is_flipped else row
+        display_col = 7 - col if is_flipped else col
+        # Если клетка уже подсвечена, убираем её из списка; иначе добавляем
+        if (display_row, display_col) in highlighted_squares:
+            highlighted_squares.remove((display_row, display_col))
+        else:
+            highlighted_squares.append((display_row, display_col))
+
+        draw_board()  # Перерисовываем доску с обновлённой подсветкой
+
+
+# Функция для сброса подсветки при нажатии левой кнопкой на пустую клетку
+def clear_highlights_on_empty_click(event):
+    col = (event.x - 20) // square_size
+    row = (event.y - 20) // square_size
+    if 0 <= col < 8 and 0 <= row < 8:
+        display_row = 7 - row if is_flipped else row
+        display_col = 7 - col if is_flipped else col
+        # Проверяем, что клетка пустая
+        if board[display_row][display_col] == " ":
+            highlighted_squares.clear()  # Очищаем все подсвеченные клетки
+            draw_board()  # Перерисовываем доску без подсветок
+
+
+# Обновленная функция для отрисовки доски с учётом подсвеченных клеток
+def draw_board():
     canvas.delete("all")
     colors = ["#F0D9B5", "#B58863"]
     for row in range(8):
         for col in range(8):
             display_row = 7 - row if is_flipped else row
             display_col = 7 - col if is_flipped else col
-            color = colors[(row + col) % 2]
+            # Подсвечиваем клетку, если она есть в списке подсвеченных
+            color = highlight_color if (display_row, display_col) in highlighted_squares else colors[(row + col) % 2]
+
             canvas.create_rectangle(20 + col * square_size, 20 + row * square_size,
                                     20 + (col + 1) * square_size, 20 + (row + 1) * square_size, fill=color)
             piece = board[display_row][display_col]
             if piece != " ":
                 canvas.create_image(20 + col * square_size, 20 + row * square_size, anchor=tk.NW, image=images[piece])
-    for i in range(8):
-        row_label = str(8 - i) if not is_flipped else str(i + 1)
-        col_label = chr(97 + i) if not is_flipped else chr(104 - i)
-        canvas.create_text(10, 20 + i * square_size + square_size / 2, text=row_label, font=("Arial", 12))
-        canvas.create_text(20 + i * square_size + square_size / 2, 8 * square_size + 30, text=col_label,
-                           font=("Arial", 12))
+
+
+# Привязка функции к правой и левой кнопке мыши
+canvas.bind("<Button-3>", highlight_square)  # Подсветка при правом клике
+canvas.bind("<Button-1>", clear_highlights_on_empty_click)  # Сброс подсветки при левом клике на пустую клетку
+
 
 def flip_board():
     global is_flipped
