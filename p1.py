@@ -100,10 +100,24 @@ move_entry.bind("<Return>", make_move)
 button_frame = tk.Frame(root)
 button_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
 
+# Список для хранения кнопок
+buttons = []
+
+# Функция для подсветки выбранной кнопки
+def highlight_button(selected_button):
+    for button in buttons:
+        button.config(bg="SystemButtonFace")  # Сбрасываем стиль всех кнопок
+    selected_button.config(bg="lightblue")  # Подсвечиваем выбранную кнопку
+    root.title(dir_name)
+
+
 # Создаем кнопки для каждого каталога
-for directory in directories:
-    button = tk.Button(button_frame, text=directory, width=20)
+for dir_name in directories:
+    # Создаем кнопку с текстом каталога
+    button = tk.Button(button_frame, text=dir_name, width=20)
+    button.config(command=lambda b=button: highlight_button(b))  # Передаем текущую кнопку в лямбда-функцию
     button.pack(pady=5)
+    buttons.append(button)
 
 # Начальная отрисовка доски
 draw_board()
