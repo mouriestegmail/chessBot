@@ -56,13 +56,19 @@ root.geometry("+500+50")
 
 is_flipped = False
 
-# Список для хранения координат всех подсвеченных клеток
-highlighted_squares = []
-highlight_color = "#FF4500"  # Охряный цвет для подсветки
+# Списки для хранения координат всех подсвеченных клеток и выбранной фигуры
+highlighted_squares = []  # Для правого клика
+selected_square = None  # Для левого клика на фигуру
+
+highlight_color = "#CC7722"  # Охряный цвет для правой кнопки
+selected_color = "#006400"  # Тёмно-зелёный цвет для левой кнопки
 
 
 # Функция для добавления/удаления подсветки клетки при правом клике
 def highlight_square(event):
+    global selected_square  # Сброс тёмно-зелёной подсветки
+    selected_square = None  # Убираем выбранную фигуру при правом клике
+
     col = (event.x - 20) // square_size
     row = (event.y - 20) // square_size
     if 0 <= col < 8 and 0 <= row < 8:
@@ -77,20 +83,32 @@ def highlight_square(event):
         draw_board()  # Перерисовываем доску с обновлённой подсветкой
 
 
-# Функция для сброса подсветки при нажатии левой кнопкой на пустую клетку
-def clear_highlights_on_empty_click(event):
+# Функция для выбора фигуры при нажатии левой кнопкой или сброса всех подсветок
+def select_piece(event):
+    global selected_square
+    selected_square = None  # Сбрасываем тёмно-зелёную подсветку при любом клике
+    highlighted_squares.clear()  # Сбрасываем охряную подсветку при любом клике ЛКМ
+
     col = (event.x - 20) // square_size
     row = (event.y - 20) // square_size
     if 0 <= col < 8 and 0 <= row < 8:
         display_row = 7 - row if is_flipped else row
         display_col = 7 - col if is_flipped else col
-        # Проверяем, что клетка пустая
-        if board[display_row][display_col] == " ":
-            highlighted_squares.clear()  # Очищаем все подсвеченные клетки
-            draw_board()  # Перерисовываем доску без подсветок
+        piece = board[display_row][display_col]
+
+        # Проверка на наличие фигуры и ограничение по цвету
+        if piece != " ":
+            is_white_piece = piece.isupper()
+            if (is_flipped and not is_white_piece) or (not is_flipped and is_white_piece):
+                # Подсвечиваем клетку с выбранной фигурой, если её цвет совпадает с ориентацией доски
+                selected_square = (display_row, display_col)
+            else:
+                selected_square = None
+
+        draw_board()  # Перерисовываем доску с обновлённой подсветкой
 
 
-# Обновленная функция для отрисовки доски с учётом подсвеченных клеток
+# Обновленная функция для отрисовки доски с учётом всех подсвеченных клеток
 def draw_board():
     canvas.delete("all")
     colors = ["#F0D9B5", "#B58863"]
@@ -98,19 +116,27 @@ def draw_board():
         for col in range(8):
             display_row = 7 - row if is_flipped else row
             display_col = 7 - col if is_flipped else col
-            # Подсвечиваем клетку, если она есть в списке подсвеченных
-            color = highlight_color if (display_row, display_col) in highlighted_squares else colors[(row + col) % 2]
+
+            # Подсвечиваем выбранную фигуру тёмно-зелёным или клетки правого клика охряным
+            if (display_row, display_col) == selected_square:
+                color = selected_color
+            elif (display_row, display_col) in highlighted_squares:
+                color = highlight_color
+            else:
+                color = colors[(row + col) % 2]
 
             canvas.create_rectangle(20 + col * square_size, 20 + row * square_size,
                                     20 + (col + 1) * square_size, 20 + (row + 1) * square_size, fill=color)
+
+            # Отображаем фигуру, если она есть на данной клетке
             piece = board[display_row][display_col]
             if piece != " ":
                 canvas.create_image(20 + col * square_size, 20 + row * square_size, anchor=tk.NW, image=images[piece])
 
 
-# Привязка функции к правой и левой кнопке мыши
+# Привязка функций к кнопкам мыши
 canvas.bind("<Button-3>", highlight_square)  # Подсветка при правом клике
-canvas.bind("<Button-1>", clear_highlights_on_empty_click)  # Сброс подсветки при левом клике на пустую клетку
+canvas.bind("<Button-1>", select_piece)  # Подсветка фигуры при левом клике
 
 
 def flip_board():
