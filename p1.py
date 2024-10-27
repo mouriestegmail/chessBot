@@ -4,6 +4,8 @@ from PIL import Image, ImageTk
 
 # Путь к каталогу с папками
 directory_path = "d:/chess"
+dir_name = ""
+file_name = ""
 
 # Получаем список имен каталогов
 directories = [name for name in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, name))]
@@ -127,6 +129,10 @@ file_button_frame.grid(row=0, column=2, padx=10, pady=10, sticky="ns")
 buttons = []
 file_buttons = []
 
+def on_directory_button_click(directory_name):
+    # Здесь будет логика для обработки нажатия на кнопку каталога
+    print(f"Нажата кнопка каталога: {directory_name}")
+
 # Функция для подсветки выбранной кнопки каталога и обновления списка файлов
 def highlight_button(selected_button):
     for button in buttons:
@@ -134,12 +140,14 @@ def highlight_button(selected_button):
     selected_button.config(bg="lightblue")  # Подсвечиваем выбранную кнопку
     root.title(selected_button.cget("text"))  # Устанавливаем заголовок окна как текст кнопки
     update_file_buttons(selected_button.cget("text"))  # Обновляем список файлов в выбранном каталоге
+    on_directory_button_click(selected_button.cget("text"))  # Вызов обработчика для кнопки каталога
 
-# Функция для подсветки выбранной кнопки файла
-def highlight_file_button(selected_file_button):
-    for button in file_buttons:
-        button.config(bg="SystemButtonFace")  # Сбрасываем стиль всех кнопок файлов
-    selected_file_button.config(bg="lightgreen")  # Подсвечиваем выбранную кнопку файла
+# # Создаем кнопки для каждого каталога
+# for dir_name in directories:
+#     button = tk.Button(button_frame, text=dir_name, width=20)
+#     button.config(command=lambda b=button: highlight_button(b))  # Передаем текущую кнопку в лямбда-функцию
+#     button.pack(pady=5)
+#     buttons.append(button)
 
 # Функция для обновления кнопок файлов в выбранном каталоге
 def update_file_buttons(selected_directory):
@@ -158,10 +166,20 @@ def update_file_buttons(selected_directory):
     for file_name in files:
         create_file_button(file_name)
 
+def on_file_button_click(file_name):
+    print(f"Нажата кнопка каталога: {file_name}")
+
+# Функция для подсветки выбранной кнопки файла
+def highlight_file_button(selected_file_button):
+    for button in file_buttons:
+        button.config(bg="SystemButtonFace")  # Сбрасываем стиль всех кнопок файлов
+    selected_file_button.config(bg="lightgreen")  # Подсвечиваем выбранную кнопку файла
+
+
 # Функция для создания кнопки файла с подсветкой
 def create_file_button(file_name):
     file_button = tk.Button(file_button_frame, text=file_name, width=20)
-    file_button.config(command=lambda b=file_button: highlight_file_button(b))
+    file_button.config(command=lambda: [highlight_file_button(file_button), on_file_button_click(file_name)])
     file_button.pack(pady=5)
     file_buttons.append(file_button)
 
