@@ -100,20 +100,54 @@ move_entry.bind("<Return>", make_move)
 button_frame = tk.Frame(root)
 button_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
 
-# Список для хранения кнопок
-buttons = []
+# Панель с кнопками для файлов внутри выбранного каталога
+file_button_frame = tk.Frame(root)
+file_button_frame.grid(row=0, column=2, padx=10, pady=10, sticky="ns")
 
-# Функция для подсветки выбранной кнопки
+# Списки для хранения кнопок
+buttons = []
+file_buttons = []
+
+# Функция для подсветки выбранной кнопки каталога и обновления списка файлов
 def highlight_button(selected_button):
     for button in buttons:
         button.config(bg="SystemButtonFace")  # Сбрасываем стиль всех кнопок
     selected_button.config(bg="lightblue")  # Подсвечиваем выбранную кнопку
-    root.title(dir_name)
+    root.title(selected_button.cget("text"))  # Устанавливаем заголовок окна как текст кнопки
+    update_file_buttons(selected_button.cget("text"))  # Обновляем список файлов в выбранном каталоге
 
+# Функция для подсветки выбранной кнопки файла
+def highlight_file_button(selected_file_button):
+    for button in file_buttons:
+        button.config(bg="SystemButtonFace")  # Сбрасываем стиль всех кнопок файлов
+    selected_file_button.config(bg="lightgreen")  # Подсвечиваем выбранную кнопку файла
+
+# Функция для обновления кнопок файлов в выбранном каталоге
+def update_file_buttons(selected_directory):
+    # Очищаем старые кнопки файлов
+    for widget in file_button_frame.winfo_children():
+        widget.destroy()
+    file_buttons.clear()  # Очищаем список file_buttons
+
+    # Путь к выбранному каталогу
+    selected_path = os.path.join(directory_path, selected_directory)
+
+    # Получаем список файлов в выбранном каталоге
+    files = [f for f in os.listdir(selected_path) if os.path.isfile(os.path.join(selected_path, f))]
+
+    # Создаем кнопки для каждого файла
+    for file_name in files:
+        create_file_button(file_name)
+
+# Функция для создания кнопки файла с подсветкой
+def create_file_button(file_name):
+    file_button = tk.Button(file_button_frame, text=file_name, width=20)
+    file_button.config(command=lambda b=file_button: highlight_file_button(b))
+    file_button.pack(pady=5)
+    file_buttons.append(file_button)
 
 # Создаем кнопки для каждого каталога
 for dir_name in directories:
-    # Создаем кнопку с текстом каталога
     button = tk.Button(button_frame, text=dir_name, width=20)
     button.config(command=lambda b=button: highlight_button(b))  # Передаем текущую кнопку в лямбда-функцию
     button.pack(pady=5)
