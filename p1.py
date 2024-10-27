@@ -47,25 +47,41 @@ images = {
 canvas = tk.Canvas(root, width=square_size * 8 + 40, height=square_size * 8 + 40)
 canvas.grid(row=0, column=0)
 
-# Функция для обновления доски на холсте
+# Переменная для отслеживания переворота доски
+is_flipped = False
+
+
 def draw_board():
+    canvas.delete("all")  # Очищаем все элементы на холсте перед перерисовкой
     colors = ["#F0D9B5", "#B58863"]
+
+    # Отрисовываем доску в зависимости от направления
     for row in range(8):
         for col in range(8):
+            # Рассчитываем строку и колонку в зависимости от переворота
+            display_row = 7 - row if is_flipped else row
+            display_col = 7 - col if is_flipped else col
             color = colors[(row + col) % 2]
-            # Рисуем клетки доски
             canvas.create_rectangle(20 + col * square_size, 20 + row * square_size,
                                     20 + (col + 1) * square_size, 20 + (row + 1) * square_size, fill=color)
-            piece = board[row][col]
+            piece = board[display_row][display_col]
             if piece != " ":
                 canvas.create_image(20 + col * square_size, 20 + row * square_size, anchor=tk.NW, image=images[piece])
 
-    # Добавляем буквенные и числовые подписи
+    # Обновление подписей для строк и столбцов
     for i in range(8):
-        # Вертикальные подписи (1-8)
-        canvas.create_text(10, 20 + i * square_size + square_size / 2, text=str(8 - i), font=("Arial", 12))
-        # Горизонтальные подписи (a-h)
-        canvas.create_text(20 + i * square_size + square_size / 2, 8 * square_size + 30, text=chr(97 + i), font=("Arial", 12))
+        # Отображаем номера и буквы в зависимости от переворота
+        row_label = str(8 - i) if not is_flipped else str(i + 1)
+        col_label = chr(97 + i) if not is_flipped else chr(104 - i)
+        canvas.create_text(10, 20 + i * square_size + square_size / 2, text=row_label, font=("Arial", 12))
+        canvas.create_text(20 + i * square_size + square_size / 2, 8 * square_size + 30, text=col_label,
+                           font=("Arial", 12))
+
+# Функция для переворота доски
+def flip_board():
+    global is_flipped
+    is_flipped = not is_flipped
+    draw_board()
 
 # Преобразование буквенно-цифровой нотации в координаты
 def notation_to_coordinates(move):
@@ -87,11 +103,14 @@ def make_move(event=None):
     except (IndexError, KeyError, ValueError):
         print("Некорректный ход. Попробуйте снова.")
 
-# Поле ввода
+# Поле ввода и кнопка переворота
 input_frame = tk.Frame(root)
 input_frame.grid(row=1, column=0, pady=10)
 move_entry = tk.Entry(input_frame, width=10)
 move_entry.grid(row=0, column=0)
+
+flip_button = tk.Button(input_frame, text="Перевернуть доску", command=flip_board)
+flip_button.grid(row=0, column=1)
 
 # Привязываем клавишу Enter к функции make_move
 move_entry.bind("<Return>", make_move)
