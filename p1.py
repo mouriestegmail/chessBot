@@ -9,6 +9,8 @@ directory_path = "d:/chess"
 dir_name = ""
 file_name = ""
 debut = None
+start_field = None
+start_colour = None
 
 directories = [name for name in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, name))]
 
@@ -85,27 +87,71 @@ def highlight_square(event):
 
 # Функция для выбора фигуры при нажатии левой кнопкой или сброса всех подсветок
 def select_piece(event):
+    rows = ['a','b','c','d','e','f','g','h']
     global selected_square
-    selected_square = None  # Сбрасываем тёмно-зелёную подсветку при любом клике
-    highlighted_squares.clear()  # Сбрасываем охряную подсветку при любом клике ЛКМ
-
+    global start_field
+    global start_colour
     col = (event.x - 20) // square_size
     row = (event.y - 20) // square_size
+
     if 0 <= col < 8 and 0 <= row < 8:
         display_row = 7 - row if is_flipped else row
         display_col = 7 - col if is_flipped else col
         piece = board[display_row][display_col]
 
-        # Проверка на наличие фигуры и ограничение по цвету
         if piece != " ":
+            colour = "while" if piece.isupper() else "black"
+        else:
+            colour = None
+
+        print(start_colour, colour)
+
+        # Проверка на наличие фигуры
+
+        print(piece!=" ", start_colour is not None, start_colour == colour)
+
+        flag = piece != " "
+        if flag:
+            print(start_colour, colour)
+            if start_colour is not None and start_colour != colour:
+                flag = False
+        print("flag = " , flag)
+        if flag:
+        # if piece != " " or (start_colour is not None and start_colour == colour):
             is_white_piece = piece.isupper()
-            if (is_flipped and not is_white_piece) or (not is_flipped and is_white_piece):
-                # Подсвечиваем клетку с выбранной фигурой, если её цвет совпадает с ориентацией доски
+
+            # Условие: если нажали повторно на ту же клетку, то снимаем выделение
+            if selected_square == (display_row, display_col):
+                selected_square = None
+            # Проверяем ограничение по цвету и назначаем подсветку, если цвета совпадают
+            elif (is_flipped and not is_white_piece) or (not is_flipped and is_white_piece):
                 selected_square = (display_row, display_col)
+                start_field = f'{rows[display_col]}{7-display_row+1}'
+                start_colour = "while" if piece.isupper() else "black"
+
             else:
                 selected_square = None
+                start_field = None
+                start_colour = None
+        else:
+            # Если нажали на пустую клетку, убираем выделение
+            print("=======")
+            if start_field is not None:
+                move = start_field + f'{rows[display_col]}{7-display_row+1}'
+                print(move)
 
-        draw_board()  # Перерисовываем доску с обновлённой подсветкой
+                if debut.check_move(move):
+                    make_move_from_code(debut.pop_move())
+                    root.after(1000, lambda: make_move_from_code(debut.pop_move()))
+
+            start_colour = None
+            start_field = None
+
+
+            selected_square = None
+            highlighted_squares.clear()
+
+    draw_board()  # Перерисовываем доску с обновлённой подсветкой
 
 
 # Обновленная функция для отрисовки доски с учётом всех подсвеченных клеток
