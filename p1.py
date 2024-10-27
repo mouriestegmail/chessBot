@@ -1,5 +1,12 @@
+import os
 import tkinter as tk
 from PIL import Image, ImageTk
+
+# Путь к каталогу с папками
+directory_path = "d:/chess"
+
+# Получаем список имен каталогов
+directories = [name for name in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, name))]
 
 # Начальная расстановка фигур
 board = [
@@ -38,7 +45,7 @@ images = {
 
 # Рисуем доску с размерами чуть больше, чтобы добавить подписи
 canvas = tk.Canvas(root, width=square_size * 8 + 40, height=square_size * 8 + 40)
-canvas.pack()
+canvas.grid(row=0, column=0)
 
 # Функция для обновления доски на холсте
 def draw_board():
@@ -55,9 +62,9 @@ def draw_board():
 
     # Добавляем буквенные и числовые подписи
     for i in range(8):
-        # Вертикальные подписи (1-8) слева от доски
+        # Вертикальные подписи (1-8)
         canvas.create_text(10, 20 + i * square_size + square_size / 2, text=str(8 - i), font=("Arial", 12))
-        # Горизонтальные подписи (a-h) под доской
+        # Горизонтальные подписи (a-h)
         canvas.create_text(20 + i * square_size + square_size / 2, 8 * square_size + 30, text=chr(97 + i), font=("Arial", 12))
 
 # Преобразование буквенно-цифровой нотации в координаты
@@ -82,12 +89,21 @@ def make_move(event=None):
 
 # Поле ввода
 input_frame = tk.Frame(root)
-input_frame.pack(pady=10)
+input_frame.grid(row=1, column=0, pady=10)
 move_entry = tk.Entry(input_frame, width=10)
 move_entry.grid(row=0, column=0)
 
 # Привязываем клавишу Enter к функции make_move
 move_entry.bind("<Return>", make_move)
+
+# Панель с кнопками для каталогов
+button_frame = tk.Frame(root)
+button_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
+
+# Создаем кнопки для каждого каталога
+for directory in directories:
+    button = tk.Button(button_frame, text=directory, width=20)
+    button.pack(pady=5)
 
 # Начальная отрисовка доски
 draw_board()
