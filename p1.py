@@ -5,7 +5,7 @@ from time import sleep
 from PIL import Image, ImageTk
 from debut import *
 
-directory_path = "d:/chess"
+directory_path = "./data"
 dir_name = ""
 file_name = ""
 debut = None
@@ -287,8 +287,8 @@ def on_file_button_click(file):
         flip_board()
     else:
         print("not flip")
-
-    root.after(1000, lambda: make_move_from_code(debut.pop_move()))
+    if debut.colour == "black":
+        root.after(1000, lambda: make_move_from_code(debut.pop_move()))
 
 def highlight_file_button(selected_file_button):
     for button in file_buttons:

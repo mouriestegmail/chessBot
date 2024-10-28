@@ -1,0 +1,12 @@
+black
+e2e4 c7c6
+d2d4 d7d5
+b1c3 d5e4
+c3e4 g8f6
+e4f6 e7f6
+c2c3 f8d6
+f1d3 b8a6
+g1e2 a6c7
+c1f4 O-O
+O-O c7d5
+f4d6 d8d6
