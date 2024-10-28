@@ -150,7 +150,7 @@ def select_piece(event):
                         move = "e10-0"
                     if field == "c1":
                         move = "e10-0-0"
-                if start_piece == "й":
+                if start_piece == "q":
                     if field == "g8":
                         move = "e80-0"
                     if field == "c8":
