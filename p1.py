@@ -11,6 +11,7 @@ file_name = ""
 debut = None
 start_field = None
 start_colour = None
+start_piece = None
 
 directories = [name for name in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, name))]
 
@@ -91,6 +92,8 @@ def select_piece(event):
     global selected_square
     global start_field
     global start_colour
+    global start_piece
+
     col = (event.x - 20) // square_size
     row = (event.y - 20) // square_size
 
@@ -128,16 +131,31 @@ def select_piece(event):
                 selected_square = (display_row, display_col)
                 start_field = f'{rows[display_col]}{7-display_row+1}'
                 start_colour = "while" if piece.isupper() else "black"
+                start_piece = piece
 
             else:
                 selected_square = None
                 start_field = None
                 start_colour = None
+                start_piece = None
         else:
             # Если нажали на пустую клетку, убираем выделение
             print("=======")
             if start_field is not None:
-                move = start_field + f'{rows[display_col]}{7-display_row+1}'
+                field = f'{rows[display_col]}{7-display_row+1}'
+                move = start_field + field
+
+                if start_piece == "Q":
+                    if field == "g1":
+                        move = "e10-0"
+                    if field == "c1":
+                        move = "e10-0-0"
+                if start_piece == "й":
+                    if field == "g8":
+                        move = "e80-0"
+                    if field == "c8":
+                        move = "e80-0-0"
+
                 print(move)
 
                 if debut.check_move(move):
@@ -201,7 +219,46 @@ def notation_to_coordinates(move):
     end_col, end_row = columns[move[2]], 8 - int(move[3])
     return (start_row, start_col), (end_row, end_col)
 
+def castle(move):
+    """Функция для выполнения рокировки"""
+    if move == "e10-0-0":  # Длинная рокировка белых
+        if board[7][4] == "K" and board[7][0] == "R":  # Проверяем, что король и ладья на нужных позициях
+            board[7][4] = " "   # Убираем короля с начальной позиции
+            board[7][0] = " "   # Убираем ладью с начальной позиции
+            board[7][2] = "K"   # Ставим короля на новую позицию
+            board[7][3] = "R"   # Ставим ладью на новую позицию
+            print("Длинная рокировка белых выполнена")
+            return True
+    elif move == "e10-0":  # Короткая рокировка белых
+        if board[7][4] == "K" and board[7][7] == "R":
+            board[7][4] = " "
+            board[7][7] = " "
+            board[7][6] = "K"
+            board[7][5] = "R"
+            print("Короткая рокировка белых выполнена")
+            return True
+    elif move == "e80-0-0":  # Длинная рокировка черных
+        if board[0][4] == "k" and board[0][0] == "r":
+            board[0][4] = " "
+            board[0][0] = " "
+            board[0][2] = "k"
+            board[0][3] = "r"
+            print("Длинная рокировка черных выполнена")
+            return True
+    elif move == "e80-0":  # Короткая рокировка черных
+        if board[0][4] == "k" and board[0][7] == "r":
+            board[0][4] = " "
+            board[0][7] = " "
+            board[0][6] = "k"
+            board[0][5] = "r"
+            print("Короткая рокировка черных выполнена")
+            return True
+    return False  # Возвращаем False, если команда не соответствует рокировке
+
 def make_move_from_code(move):
+    if castle(move):  # Проверяем, является ли команда рокировкой
+        draw_board()  # Перерисовываем доску после рокировки
+        return
     try:
         (start_row, start_col), (end_row, end_col) = notation_to_coordinates(move)
         piece = board[start_row][start_col]

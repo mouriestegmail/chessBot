@@ -20,7 +20,12 @@ class Debut:
         except Exception as e:
             print(f"Произошла ошибка: {e}")
 
-        number_of_move=0
+        for i in range(len(self.moves)):
+            if "0-0" in self.moves[i]:
+                if i % 2 == 0:
+                    self.moves[i] = "e1"+self.moves[i]
+                else:
+                    self.moves[i] = "e8" + self.moves[i]
 
     def pop_move(self):
         return self.moves.pop(0)
