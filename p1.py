@@ -107,18 +107,18 @@ def select_piece(event):
         else:
             colour = None
 
-        print(start_colour, colour)
+
 
         # Проверка на наличие фигуры
 
-        print(piece!=" ", start_colour is not None, start_colour == colour)
+
 
         flag = piece != " "
         if flag:
-            print(start_colour, colour)
+
             if start_colour is not None and start_colour != colour:
                 flag = False
-        print("flag = " , flag)
+
         if flag:
         # if piece != " " or (start_colour is not None and start_colour == colour):
             is_white_piece = piece.isupper()
@@ -140,23 +140,21 @@ def select_piece(event):
                 start_piece = None
         else:
             # Если нажали на пустую клетку, убираем выделение
-            print("=======")
+
             if start_field is not None:
                 field = f'{rows[display_col]}{7-display_row+1}'
                 move = start_field + field
 
-                if start_piece == "Q":
+                if start_piece == "K":
                     if field == "g1":
                         move = "e10-0"
                     if field == "c1":
                         move = "e10-0-0"
-                if start_piece == "q":
+                if start_piece == "k":
                     if field == "g8":
                         move = "e80-0"
                     if field == "c8":
                         move = "e80-0-0"
-
-                print(move)
 
                 if debut.check_move(move):
                     make_move_from_code(debut.pop_move())
@@ -220,6 +218,7 @@ def notation_to_coordinates(move):
     return (start_row, start_col), (end_row, end_col)
 
 def castle(move):
+
     """Функция для выполнения рокировки"""
     if move == "e10-0-0":  # Длинная рокировка белых
         if board[7][4] == "K" and board[7][0] == "R":  # Проверяем, что король и ладья на нужных позициях
@@ -336,14 +335,14 @@ def on_file_button_click(file):
     global debut
     file_name = dir_name + "/" + file
     debut = Debut(file_name)
-    print(debut.moves)
+
     reset_board()
-    print(debut.colour, is_flipped)
+
     if (debut.colour == "white" and is_flipped) or (debut.colour == "black" and not is_flipped):
-        print("flip")
+
         flip_board()
-    else:
-        print("not flip")
+
+
     if debut.colour == "black":
         root.after(1000, lambda: make_move_from_code(debut.pop_move()))
 

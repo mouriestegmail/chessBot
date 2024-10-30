@@ -8,7 +8,7 @@ class Debut:
                 for line_number, line in enumerate(file, start=1):
                     if i == 0:
                         self.colour = line.strip()
-                        print(f"дебют за {self.colour}")
+                        print(f"Opening by  {self.colour}")
                         i += 1
                         continue
                     i += 1
@@ -33,5 +33,5 @@ class Debut:
     def check_move(self, move):
         if len(self.moves) == 0:
             return False
-        print(move, self.moves[0])
+
         return move in self.moves[0]
