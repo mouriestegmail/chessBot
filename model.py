@@ -70,32 +70,31 @@ class Model:
             # Проверка на рокировку
             if field_from.piece in {"K", "k"} and c == 4 and row in [0,7] and r in [0,7]:
                 print("K")
+                move = ""
                 if col == 6:
                     print(1)
                     move = "0-0"
                 elif col == 2:
                     print(2)
                     move = "0-0-0"
-                else:
-                    field_from.left_selected = False
 
-                    return True
-
-                if self.debut is not None:
-                    if self.debut.check_move(move):
-                        self.debut.pop_move()
-                        if self.try_castling(field_from, row, col):
-                            self.white_move = not self.white_move
-                            self.auto_move = True
+                if "0" in move:
+                    if self.debut is not None:
+                        if self.debut.check_move(move):
+                            self.debut.pop_move()
+                            if self.try_castling(field_from, row, col):
+                                self.white_move = not self.white_move
+                                self.auto_move = True
+                                return True
+                        else:
+                            field_from.left_selected = False
                             return True
                     else:
-                        field_from.left_selected = False
-                        return True
-                else:
-                    if self.try_castling(field_from, row, col):
-                        self.white_move = not self.white_move
-                        self.save_move(move)
-                        return True
+
+                        if self.try_castling(field_from, row, col):
+                            self.white_move = not self.white_move
+                            self.save_move(move)
+                            return True
 
 
             print("general")
