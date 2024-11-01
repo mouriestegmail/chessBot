@@ -29,9 +29,11 @@ class Debut:
 
     def pop_move(self):
         return self.moves.pop(0)
+    def get_move(self):
+        return self.moves[0]
 
     def check_move(self, move):
         if len(self.moves) == 0:
             return False
-
+        print(move, self.moves[0])
         return move in self.moves[0]

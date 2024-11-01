@@ -7,6 +7,6 @@ e4f6 e7f6
 c2c3 f8d6
 f1d3 b8a6
 g1e2 a6c7
-c1f4 O-O
-O-O c7d5
+c1f4 0-0
+0-0 c7d5
 f4d6 d8d6
