@@ -9,6 +9,7 @@ class Field:
             self.is_white = is_white
         self.left_selected = False
 
+
     def __str__(self):
         return f"{self.piece}  w:{self.is_white}  sel:{self.left_selected}"
 
@@ -20,6 +21,7 @@ class Model:
         self.board = [row[:] for row in self.init_board]
         self.white_move = True
         self.auto_move = False
+        self.moves = []
 
         print(self.board[4][4])
 
@@ -41,6 +43,7 @@ class Model:
     def reset_board(self):
         self.board = [row[:] for row in self.init_board]
         self.white_move = True
+        self.moves.clear()
 
     def left_click(self, row, col):
         field_to = self.board[row][col]
@@ -54,9 +57,12 @@ class Model:
 
             # Проверка на рокировку
             if field_from.piece in {"K", "k"} and c == 4 and row in [0,7] and r in [0,7]:
+                print("K")
                 if col == 6:
+                    print(1)
                     move = "0-0"
                 elif col == 2:
+                    print(2)
                     move = "0-0-0"
                 else:
                     field_from.left_selected = False
@@ -73,11 +79,24 @@ class Model:
                     else:
                         field_from.left_selected = False
                         return True
+                else:
+                    if field_to.is_white == self.white_move:
+                        field_to.left_selected = True
+                        field_from.left_selected = False
+                        return True
+                    if self.try_castling(field_from, row, col):
+                        self.white_move = not self.white_move
+                        self.save_move(move)
+                        return True
+
 
             print("general")
             # Обычный ход
             move = self.coords_to_notation(r,c,row,col)
-            print(move)
+
+            self.save_move(move)
+
+            print(self.moves)
 
             make_move = self.debut and self.debut.check_move(move) or self.debut is None
 
@@ -111,6 +130,17 @@ class Model:
             return True
 
         return False
+    def save_move(self,move):
+        if self.debut is None:
+            self.moves.append(move)
+
+    def moves_to_text(self):
+        result = ""
+        for i, m in enumerate(self.moves):
+            if i % 2 == 0 and i > 0:
+                result += "\n"
+            result += m + " "
+        return result.rstrip()
 
     def try_castling(self, king_field, row, col):
         if king_field.piece == "K":

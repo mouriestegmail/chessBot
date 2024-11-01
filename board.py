@@ -2,17 +2,17 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from model import *
 import os
-class Board:
+from tkinter import filedialog
 
-    def __init__(self, model:Model):
+class Board:
+    def __init__(self, model: Model):
         self.start_field = None
         self.start_colour = None
         self.start_piece = None
         self.selected_square = None
         self.debut = None
         self.directory_path = "./data"
-
-
+        self.is_recording = False  # Флаг состояния записи
 
         self.root = tk.Tk()
         self.root.title("Шахматная доска")
@@ -40,11 +40,8 @@ class Board:
 
         self.root.geometry("+500+50")
         self.is_flipped = False
-
-        # Привязка функций к кнопкам мыши
-        # canvas.bind("<Button-3>", highlight_square)  # Подсветка при правом клике
-        self.canvas.bind("<Button-1>", self.on_left_button_click)  # Подсветка фигуры при левом клике
         self.model = model
+        self.choice_var = tk.StringVar()
 
         # Добавляем кнопки управления под доской
         self.control_frame = tk.Frame(self.root)
@@ -55,6 +52,11 @@ class Board:
 
         self.reset_button = tk.Button(self.control_frame, text="Начальное положение", command=self.reset_board)
         self.reset_button.grid(row=0, column=1, padx=5)
+
+        self.record_button = tk.Button(self.control_frame, text="Сохранить", command=self.toggle_recording)
+        self.record_button.grid(row=0, column=2, padx=5)
+
+        self.canvas.bind("<Button-1>", self.on_left_button_click)  # Подсветка фигуры при левом клике
 
         # Список для кнопок каталога и файлов
         self.directory_buttons = []
@@ -68,6 +70,55 @@ class Board:
 
         # Загружаем каталоги
         self.load_directories()
+
+    def toggle_recording(self):
+        """Переключает состояние записи."""
+
+        if len(self.model.moves) == 0:
+            return
+
+
+
+        file_path = filedialog.asksaveasfilename(
+            initialdir="./data",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Сохранить файл как"
+        )
+        if file_path:
+
+            color = self.confirmation_dialog()
+
+            try:
+                with open(file_path, "w") as file:
+                    file.write(color + "\n")
+                    file.write(self.model.moves_to_text())
+                print(f"Запись в файл '{file_path}' завершена.")
+            except Exception as e:
+                print(f"Ошибка записи в файл: {e}")
+
+    def confirmation_dialog(self):
+        # Окно с вопросом после выбора файла
+        confirmation_window = tk.Toplevel(self.root)
+        confirmation_window.title("Какой цвет?")
+
+        # Функции для обработки выбора
+        def choose_black():
+            self.choice_var.set("black")
+            confirmation_window.destroy()
+
+        def choose_white():
+            self.choice_var.set("white")
+            confirmation_window.destroy()
+
+        # Кнопки для выбора цвета
+        button_black = tk.Button(confirmation_window, text="Чёрный", command=choose_black)
+        button_black.pack(side="left", padx=20, pady=10)
+
+        button_white = tk.Button(confirmation_window, text="Белый", command=choose_white)
+        button_white.pack(side="right", padx=20, pady=10)
+        self.root.wait_variable(self.choice_var)
+        return self.choice_var.get()
 
     def load_directories(self):
         """Создаем кнопки для каждого каталога."""
@@ -115,75 +166,53 @@ class Board:
 
         self.root.after(1000, lambda: self.model.make_debut_move(self.draw_board))
 
-
-
     def draw_board(self):
         self.canvas.delete("all")
         colors = ["#F0D9B5", "#B58863"]
         selected_color = "#228B22"
         for r, row in enumerate(self.model.board):
             for c, item in enumerate(row):
-                # Переворачиваем доску, если is_flipped == True
                 display_row = 7 - r if self.is_flipped else r
                 display_col = 7 - c if self.is_flipped else c
-
-                # Определяем цвет клетки
                 color = selected_color if item.left_selected else colors[(display_row + display_col) % 2]
                 size = self.square_size
 
-                # Отрисовываем клетку
                 self.canvas.create_rectangle(
                     20 + display_col * size, 20 + display_row * size,
                     20 + (display_col + 1) * size, 20 + (display_row + 1) * size,
                     fill=color
                 )
 
-                # Отображаем фигуру, если она есть на данной клетке
                 if item.piece is not None:
                     self.canvas.create_image(
                         20 + display_col * size, 20 + display_row * size,
                         anchor=tk.NW, image=self.images[item.piece]
                     )
-        # Добавляем подписи для полей
+
         for i in range(8):
-            # Горизонтальная подпись (буквы)
             letter = chr(ord('a') + (7 - i if self.is_flipped else i))
             self.canvas.create_text(20 + i * size + size / 2, 8 * size + 30, text=letter, font=("Arial", 12))
-
-            # Вертикальная подпись (цифры)
-            number = str( i+ 1 if self.is_flipped else 8 - i)
+            number = str(i + 1 if self.is_flipped else 8 - i)
             self.canvas.create_text(10, 20 + i * size + size / 2, text=number, font=("Arial", 12))
 
-    def make_move(self, move:str):
+    def make_move(self, move: str):
         pass
 
     def on_left_button_click(self, event):
         size = self.square_size
-
-        # Получаем строку и столбец из клика
         col = (event.x - 20) // size
         row = (event.y - 20) // size
-
-        # Проверяем, что клик в пределах доски
         if 0 <= col < 8 and 0 <= row < 8:
-            # Преобразуем координаты обратно для модели
             model_row = 7 - row if self.is_flipped else row
             model_col = 7 - col if self.is_flipped else col
-
-            # Передаём координаты в модель
-
             if self.model.left_click(model_row, model_col):
                 self.draw_board()
-                self.root.after(2000, lambda:self.model.make_debut_move(self.draw_board))
-
+                self.root.after(2000, lambda: self.model.make_debut_move(self.draw_board))
 
     def flip_board(self):
-        """Поворачивает доску"""
         self.is_flipped = not self.is_flipped
         self.draw_board()
 
     def reset_board(self):
-        """Сбрасывает доску к начальному состоянию"""
         self.model.reset_board()
         self.draw_board()
-
