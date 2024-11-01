@@ -159,7 +159,8 @@ class Board:
         file_path = os.path.join(self.directory_path, directory_name, file_name)
         self.model.load_debut(file_path)
         self.model.debut.colour = "black"
-        if self.is_flipped == (self.model.debut.colour == "white"):
+        if (self.model.debut.colour == "white" and not self.is_flipped) or \
+                (self.model.debut.colour == "black" and self.is_flipped):
             self.flip_board()
 
         self.reset_board()

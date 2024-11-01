@@ -42,6 +42,11 @@ class Model:
 
     def reset_board(self):
         self.board = [row[:] for row in self.init_board]
+
+        for r in self.board:
+            for i in r:
+                i.left_selected = False
+
         self.white_move = True
         self.moves.clear()
 
@@ -53,7 +58,14 @@ class Model:
 
         field_from, r, c = self.get_selected()
         print(field_from, r, c)
+
+
+
         if field_from is not None:
+            if field_to.is_white == self.white_move:
+                field_to.left_selected = True
+                field_from.left_selected = False
+                return True
 
             # Проверка на рокировку
             if field_from.piece in {"K", "k"} and c == 4 and row in [0,7] and r in [0,7]:
@@ -80,10 +92,6 @@ class Model:
                         field_from.left_selected = False
                         return True
                 else:
-                    if field_to.is_white == self.white_move:
-                        field_to.left_selected = True
-                        field_from.left_selected = False
-                        return True
                     if self.try_castling(field_from, row, col):
                         self.white_move = not self.white_move
                         self.save_move(move)
@@ -101,12 +109,6 @@ class Model:
             make_move = self.debut and self.debut.check_move(move) or self.debut is None
 
             print(field_to.is_white, self.white_move)
-
-            if field_to.is_white == self.white_move:
-
-                field_to.left_selected = True
-                field_from.left_selected = False
-                return True
 
             if make_move:
                 if self.debut is not None:
