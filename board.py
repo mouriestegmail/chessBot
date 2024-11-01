@@ -4,6 +4,11 @@ from model import *
 import os
 from tkinter import filedialog
 
+import platform
+
+def is_macos():
+    return platform.system() == "Darwin"
+
 class Board:
     def __init__(self, model: Model):
         self.start_field = None
@@ -130,6 +135,11 @@ class Board:
             button.pack(pady=5)
             self.directory_buttons.append(button)
 
+    def on_directory_button_click(self, directory_name):
+        """Обработчик для выбора каталога."""
+        print(f"Выбран каталог: {directory_name}")
+        self.load_files(directory_name)
+        self.model.reset_debut()
     def load_files(self, selected_directory):
         """Создаем кнопки для файлов в выбранном каталоге."""
         # Очищаем текущие кнопки файлов
@@ -144,28 +154,34 @@ class Board:
         # Создаем кнопки для каждого файла
         for file_name in files:
             button = tk.Button(self.file_button_frame, text=file_name, width=20)
-            button.config(command=lambda name=file_name: self.on_file_button_click(selected_directory, name))
+            # Применяем замыкание для сохранения file_name и selected_directory
+            button.config(command=lambda b=button, fn=file_name: [self.highlight_file_button(b),
+                                                                  self.on_file_button_click(selected_directory, fn)])
             button.pack(pady=5)
             self.file_buttons.append(button)
 
-    def on_directory_button_click(self, directory_name):
-        """Обработчик для выбора каталога."""
-        print(f"Выбран каталог: {directory_name}")
-        self.load_files(directory_name)
-        self.model.reset_debut()
-
     def on_file_button_click(self, directory_name, file_name):
         print(f"Выбран файл: {file_name} из каталога {directory_name}")
+
         file_path = os.path.join(self.directory_path, directory_name, file_name)
         self.model.load_debut(file_path)
         self.model.debut.colour = "black"
+
         if (self.model.debut.colour == "white" and not self.is_flipped) or \
-                (self.model.debut.colour == "black" and self.is_flipped):
+                                (self.model.debut.colour == "black" and self.is_flipped):
             self.flip_board()
+            self.reset_board()
+            self.root.after(1000, lambda: self.model.make_debut_move(self.draw_board))
 
-        self.reset_board()
-
-        self.root.after(1000, lambda: self.model.make_debut_move(self.draw_board))
+    def highlight_file_button(self, selected_file_button):
+        """Подсвечивает выбранную кнопку файла."""
+        for button in self.file_buttons:
+            button.config(bg="SystemButtonFace", highlightbackground="SystemButtonFace")
+        if is_macos():
+            selected_file_button.config(bg="lightgreen", highlightbackground="lightgreen")
+        else:
+            selected_file_button.config(bg="lightgreen")
+        self.file_button_frame.update_idletasks()
 
     def draw_board(self):
         self.canvas.delete("all")
