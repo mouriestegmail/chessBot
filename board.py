@@ -63,6 +63,9 @@ class Board:
         self.record_button = tk.Button(self.control_frame, text="Сохранить", command=self.toggle_recording)
         self.record_button.grid(row=0, column=2, padx=5)
 
+        self.record_button = tk.Button(self.control_frame, text="?", command=self.toggle_help)
+        self.record_button.grid(row=0, column=3, padx=5)
+
         self.root.bind("<Left>", self.handle_left_arrow)
 
         # Привязка к стрелке вправо
@@ -82,6 +85,10 @@ class Board:
 
         # Загружаем каталоги
         self.load_directories()
+
+    def toggle_help(self):
+        self.model.help()
+        self.draw_board()
 
     def handle_left_arrow(self, event):
         if self.model.debut != None:
@@ -253,6 +260,7 @@ class Board:
                 self.root.after(2000, lambda: self.model.make_debut_move(self.draw_board))
 
     def flip_board(self):
+        print("flip")
         self.is_flipped = not self.is_flipped
         self.draw_board()
 

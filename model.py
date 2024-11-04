@@ -11,6 +11,7 @@ class Field:
         self.left_selected = False
 
 
+
     def __str__(self):
         return f"{self.piece}  w:{self.is_white}  sel:{self.left_selected}"
 
@@ -31,6 +32,15 @@ class Model:
         self.boards.append(copy.deepcopy(self.__board))
         self.shift = 0
         print(self.__board[4][4])
+
+    def help(self):
+        if self.debut is None:
+            return
+
+        move = self.debut.get_move()
+        r,c = self.get_from_from_notation(move)
+        self.__board[r][c].left_selected = True
+
 
     def get_board(self):
         return self.__board
@@ -238,6 +248,23 @@ class Model:
         to_row_number = 8 - to_row
 
         return f"{from_col_letter}{from_row_number}{to_col_letter}{to_row_number}"
+
+    def get_from_from_notation(self, notation):
+        if "0-0-0" in notation:
+            if self.white_move:
+                return 7, 2
+            else:
+                return 0, 2
+        elif "0-0" in notation:
+            if self.white_move:
+                return 7, 6
+            else:
+                return 0, 6
+
+        columns = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        from_col = columns[notation[0]]
+        from_row = 8 - int(notation[1])
+        return from_row, from_col
 
     def make_move_from_notation(self, notation):
         print("make_move_from_notation")
