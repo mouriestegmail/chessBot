@@ -220,9 +220,9 @@ class Board:
         if self.model.debut is not None:
             print(f" debut.get_move() = {self.model.debut.get_move()}")
         if self.model.debut is not None and self.model.debut.get_move() is None:
-            colors = ["#eeeeee",'#cccccc','#999999']
+            colors = ["#eeeeee",'#cccccc','#FFFF00', '#FFD700']
         else:
-            colors = ["#F0D9B5", "#B58863", '#999999']
+            colors = ["#F0D9B5", "#B58863", '#FFFF00', '#FFD700']
         selected_color = "#228B22"
         board = self.model.get_board()
         last = board.last_move
@@ -231,11 +231,11 @@ class Board:
             for c, item in enumerate(row):
                 display_row = 7 - r if self.is_flipped else r
                 display_col = 7 - c if self.is_flipped else c
-                color = selected_color if item.left_selected else colors[(display_row + display_col) % 2]
+                shift = 0
+                if (r, c) in last:
+                    shift = 2
+                color = selected_color if item.left_selected else colors[(display_row + display_col) % 2 + shift]
                 size = self.square_size
-
-                if (r,c) in last:
-                    color = colors[2]
 
                 self.canvas.create_rectangle(
                     20 + display_col * size, 20 + display_row * size,

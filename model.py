@@ -165,7 +165,7 @@ class Model:
                     self.debut.pop_move()
                     self.auto_move = True
                 self.__board.data[row][col] = field_from
-                self.__board.last_move = [(row, col)]
+                self.__board.last_move = [(row, col), (r,c)]
                 field_from.left_selected = False
                 self.__board.data[r][c] = Field()
                 self.white_move = not self.white_move
