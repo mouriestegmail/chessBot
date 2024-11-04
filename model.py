@@ -1,5 +1,6 @@
 from typing import Optional
 from debut import Debut
+import copy
 
 class Field:
     def __init__(self, piece: Optional[str] = None, is_white: Optional[bool] = None):
@@ -13,18 +14,45 @@ class Field:
     def __str__(self):
         return f"{self.piece}  w:{self.is_white}  sel:{self.left_selected}"
 
+class Board:
+    def __init__(self):
+        pass
+
 
 class Model:
     def __init__(self):
         self.debut: Debut or None = None
         self.init_board = self._create_initial_board()
-        self.board = [row[:] for row in self.init_board]
+        self.__board = [row[:] for row in self.init_board]
         self.white_move = True
         self.auto_move = False
         self.moves = []
+        self.boards = []
+        self.boards.append(copy.deepcopy(self.__board))
+        self.shift = 0
+        print(self.__board[4][4])
 
-        print(self.board[4][4])
+    def get_board(self):
+        return self.__board
+    def back(self):
+        print(self.shift, "  ", self.moves, len(self.boards))
 
+        if self.shift < len(self.moves):
+            self.shift += 1
+
+            print(self.shift, "  ", self.moves)
+
+
+
+            self.__board = copy.deepcopy(self.boards[-(self.shift + 1)])
+            self.white_move = not self.white_move
+
+
+    def next(self):
+        if self.shift > 0:
+            self.shift -= 1
+            self.__board = copy.deepcopy(self.boards[-(self.shift + 1)])
+            self.white_move = not self.white_move
 
 
     def _create_initial_board(self):
@@ -41,17 +69,22 @@ class Model:
         return [[Field(piece, piece is not None and piece.isupper()) for piece in row] for row in init_layout]
 
     def reset_board(self):
-        self.board = [row[:] for row in self.init_board]
+        self.__board = [row[:] for row in self.init_board]
 
-        for r in self.board:
+        for r in self.__board:
             for i in r:
                 i.left_selected = False
 
         self.white_move = True
         self.moves.clear()
+        self.boards.clear()
+        self.boards.append(self.__board)
 
     def left_click(self, row, col):
-        field_to = self.board[row][col]
+
+        print(f"left click e2 == {self.__board[6][4]}")
+
+        field_to = self.__board[row][col]
         if field_to.left_selected:
             field_to.left_selected = False
             return True
@@ -101,7 +134,7 @@ class Model:
             # Обычный ход
             move = self.coords_to_notation(r,c,row,col)
 
-            self.save_move(move)
+
 
             print(self.moves)
 
@@ -113,10 +146,11 @@ class Model:
                 if self.debut is not None:
                     self.debut.pop_move()
                     self.auto_move = True
-                self.board[row][col] = field_from
+                self.__board[row][col] = field_from
                 field_from.left_selected = False
-                self.board[r][c] = Field()
+                self.__board[r][c] = Field()
                 self.white_move = not self.white_move
+                self.save_move(move)
 
                 print("moving....")
                 return True
@@ -124,16 +158,24 @@ class Model:
                 field_from.left_selected = False
                 return True
 
+        print("selected!!!")
         # Подсветка выбранной фигуры
         if field_to.piece is not None and field_to.is_white == self.white_move:
             print("selected")
-            self.board[row][col].left_selected = True
+            self.__board[row][col].left_selected = True
             return True
 
         return False
     def save_move(self,move):
         if self.debut is None:
-            self.moves.append(move)
+            if self.shift > 0:
+                del self.moves[-self.shift:]
+                del self.boards[-self.shift:]
+
+            self.shift = 0
+
+            self.moves.append(copy.deepcopy(move))
+            self.boards.append(copy.deepcopy(self.__board))
 
     def moves_to_text(self):
         result = ""
@@ -162,12 +204,12 @@ class Model:
 
     def perform_castling(self, king_row, king_col, rook_row, rook_col, new_rook_col, new_king_col):
         """Перемещает короля и ладью при рокировке"""
-        self.board[king_row][king_col], self.board[rook_row][rook_col] = Field(), Field()
-        self.board[king_row][new_king_col] = Field("K" if self.white_move else "k", self.white_move)
-        self.board[rook_row][new_rook_col] = Field("R" if self.white_move else "r", self.white_move)
+        self.__board[king_row][king_col], self.__board[rook_row][rook_col] = Field(), Field()
+        self.__board[king_row][new_king_col] = Field("K" if self.white_move else "k", self.white_move)
+        self.__board[rook_row][new_rook_col] = Field("R" if self.white_move else "r", self.white_move)
 
     def get_selected(self):
-        for r, row in enumerate(self.board):
+        for r, row in enumerate(self.__board):
             for c, item in enumerate(row):
                 if item.left_selected:
                     return item, r, c
@@ -202,17 +244,17 @@ class Model:
 
         if "0-0-0" in notation:
             if self.white_move:
-                self.board[7][4].left_selected = True
+                self.__board[7][4].left_selected = True
                 self.left_click(7,2)
             else:
-                self.board[0][4].left_selected = True
+                self.__board[0][4].left_selected = True
                 self.left_click(0, 2)
         elif "0-0" in notation:
             if self.white_move:
-                self.board[7][4].left_selected = True
+                self.__board[7][4].left_selected = True
                 self.left_click(7, 6)
             else:
-                self.board[0][4].left_selected = True
+                self.__board[0][4].left_selected = True
                 self.left_click(0, 6)
         else:
 
@@ -223,7 +265,7 @@ class Model:
             to_col = columns[notation[2]]
             to_row = 8 - int(notation[3])
 
-            self.board[from_row][from_col].left_selected = True
+            self.__board[from_row][from_col].left_selected = True
             self.left_click(to_row, to_col)
 
 

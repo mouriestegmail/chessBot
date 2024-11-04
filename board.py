@@ -61,6 +61,11 @@ class Board:
         self.record_button = tk.Button(self.control_frame, text="Сохранить", command=self.toggle_recording)
         self.record_button.grid(row=0, column=2, padx=5)
 
+        self.root.bind("<Left>", self.handle_left_arrow)
+
+        # Привязка к стрелке вправо
+        self.root.bind("<Right>", self.handle_right_arrow)
+
         self.canvas.bind("<Button-1>", self.on_left_button_click)  # Подсветка фигуры при левом клике
 
         # Список для кнопок каталога и файлов
@@ -75,6 +80,25 @@ class Board:
 
         # Загружаем каталоги
         self.load_directories()
+
+    def handle_left_arrow(self, event):
+        if self.model.debut != None:
+            return
+
+        self.model.back()
+        self.draw_board()
+
+
+
+        print("Нажата стрелка влево")
+
+    def handle_right_arrow(self, event):
+        if self.model.debut != None:
+            return
+
+        self.model.next()
+        self.draw_board()
+        print("Нажата стрелка вправо")
 
     def toggle_recording(self):
         """Переключает состояние записи."""
@@ -187,7 +211,7 @@ class Board:
         self.canvas.delete("all")
         colors = ["#F0D9B5", "#B58863"]
         selected_color = "#228B22"
-        for r, row in enumerate(self.model.board):
+        for r, row in enumerate(self.model.get_board()):
             for c, item in enumerate(row):
                 display_row = 7 - r if self.is_flipped else r
                 display_col = 7 - c if self.is_flipped else c
