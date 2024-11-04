@@ -6,8 +6,10 @@ from tkinter import filedialog
 
 import platform
 
+
 def is_macos():
     return platform.system() == "Darwin"
+
 
 class Board:
     def __init__(self, model: Model):
@@ -88,8 +90,6 @@ class Board:
         self.model.back()
         self.draw_board()
 
-
-
         print("Нажата стрелка влево")
 
     def handle_right_arrow(self, event):
@@ -105,8 +105,6 @@ class Board:
 
         if len(self.model.moves) == 0:
             return
-
-
 
         file_path = filedialog.asksaveasfilename(
             initialdir="./data",
@@ -164,6 +162,7 @@ class Board:
         print(f"Выбран каталог: {directory_name}")
         self.load_files(directory_name)
         self.model.reset_debut()
+
     def load_files(self, selected_directory):
         """Создаем кнопки для файлов в выбранном каталоге."""
         # Очищаем текущие кнопки файлов
@@ -189,12 +188,15 @@ class Board:
 
         file_path = os.path.join(self.directory_path, directory_name, file_name)
         self.model.load_debut(file_path)
-        self.model.debut.colour = "black"
 
-        if (self.model.debut.colour == "white" and not self.is_flipped) or \
-                                (self.model.debut.colour == "black" and self.is_flipped):
+        self.reset_board()
+
+        print(f"flipped = {self.is_flipped}  color = {self.model.debut.colour}")
+        if (self.model.debut.colour == "white" and self.is_flipped) or \
+                (self.model.debut.colour == "black" and not self.is_flipped):
             self.flip_board()
-            self.reset_board()
+
+        if self.model.debut.colour == "black":
             self.root.after(1000, lambda: self.model.make_debut_move(self.draw_board))
 
     def highlight_file_button(self, selected_file_button):
