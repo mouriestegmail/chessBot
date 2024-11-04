@@ -17,7 +17,6 @@ class Board:
         self.start_colour = None
         self.start_piece = None
         self.selected_square = None
-        self.debut = None
         self.directory_path = "./data"
         self.is_recording = False  # Флаг состояния записи
 
@@ -218,14 +217,25 @@ class Board:
 
     def draw_board(self):
         self.canvas.delete("all")
-        colors = ["#F0D9B5", "#B58863"]
+        if self.model.debut is not None:
+            print(f" debut.get_move() = {self.model.debut.get_move()}")
+        if self.model.debut is not None and self.model.debut.get_move() is None:
+            colors = ["#eeeeee",'#cccccc','#999999']
+        else:
+            colors = ["#F0D9B5", "#B58863", '#999999']
         selected_color = "#228B22"
-        for r, row in enumerate(self.model.get_board()):
+        board = self.model.get_board()
+        last = board.last_move
+        print("last move = ", last)
+        for r, row in enumerate(board.data):
             for c, item in enumerate(row):
                 display_row = 7 - r if self.is_flipped else r
                 display_col = 7 - c if self.is_flipped else c
                 color = selected_color if item.left_selected else colors[(display_row + display_col) % 2]
                 size = self.square_size
+
+                if (r,c) in last:
+                    color = colors[2]
 
                 self.canvas.create_rectangle(
                     20 + display_col * size, 20 + display_row * size,
@@ -233,11 +243,14 @@ class Board:
                     fill=color
                 )
 
+
+
                 if item.piece is not None:
                     self.canvas.create_image(
                         20 + display_col * size, 20 + display_row * size,
                         anchor=tk.NW, image=self.images[item.piece]
                     )
+
 
         for i in range(8):
             letter = chr(ord('a') + (7 - i if self.is_flipped else i))
