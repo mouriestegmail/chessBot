@@ -220,10 +220,11 @@ class Board:
         if self.model.debut is not None:
             print(f" debut.get_move() = {self.model.debut.get_move()}")
         if self.model.debut is not None and self.model.debut.get_move() is None:
-            colors = ["#eeeeee",'#cccccc','#FFFF00', '#FFD700']
+            colors = ["#eeeeee",'#cccccc','#eeeedd', '#ccccbb']
         else:
-            colors = ["#F0D9B5", "#B58863", '#FFFF00', '#FFD700']
-        selected_color = "#228B22"
+            colors = ["#F0D9B5", "#B58863", '#c7cc7b', '#a0994a']
+
+        selected_color = "#8e9568"
         board = self.model.get_board()
         last = board.last_move
         print("last move = ", last)
