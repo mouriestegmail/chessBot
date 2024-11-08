@@ -1,0 +1,9 @@
+white
+e2e4 e7e5
+b1c3 g8f6
+f2f4 e5f4
+e4e5 d8e7
+d1e2 f6g8
+g1f3 d7d6
+c3d5 e7d7
+e5d6

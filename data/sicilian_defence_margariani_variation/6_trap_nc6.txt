@@ -1,0 +1,24 @@
+white
+e2e4 c7c5 
+a2a3 b8c6 
+b2b4 c5b4 
+a3b4 c6b4 
+c2c3 b4c6 
+d2d4 d7d5 
+e4d5 d8d5 
+b1a3 e7e5 
+a3b5 d5d8 
+d4d5 c6b8 
+d5d6 b8a6 
+a1a6 b7a6 
+b5c7 e8d7 
+d1a4 d7d6 
+c7e8 d6e6 
+f1c4 e6f5 
+a4c2 e5e4 
+g2g4 f5e5 
+f2f4 e4f3 
+f4e5 d8e1 
+g1f3 e1f3 
+g4f3 f7f4 
+f3f4
